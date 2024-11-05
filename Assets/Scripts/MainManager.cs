@@ -13,6 +13,7 @@ public class MainManager : MonoBehaviour
     private bool m_Started = false;
     private int m_Points;
     private MainUI UIManager;
+    private DataManager.Player currentPlayer;
     
     private bool m_GameOver = false;
 
@@ -20,8 +21,10 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        currentPlayer = DataManager.Instance.currentPlayer;
         UIManager = FindObjectOfType<MainUI>();
         AddPoint(0);
+        UIManager.BestScoreText.text = $"Best score: {DataManager.Instance.bestPlayerName} : {DataManager.Instance.bestScore}";
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -65,12 +68,17 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        UIManager.ScoreText.text = $"Score : {DataManager.Instance.playerName} : {m_Points}";
+        UIManager.UpdateScore(m_Points, currentPlayer.PlayerName);
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         UIManager.GameOverText.SetActive(true);
+        if (DataManager.Instance.HighScore(m_Points))
+        {
+            UIManager.UpdateBestScore(m_Points, currentPlayer.PlayerName);
+        }
+        DataManager.Instance.Save();
     }
 }
